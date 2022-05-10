@@ -5,12 +5,13 @@ from users.models import User
 
 class Review(models.Model):
     """Модель отзыва."""
-    title = models.ForeignKey(
-        to=Title,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Название произведения'
-    )
+    # TODO: Добавить Модель Titel
+    # title = models.ForeignKey(
+    #     to=Title,
+    #     on_delete=models.CASCADE,
+    #     related_name='reviews',
+    #     verbose_name='Название произведения'
+    # )
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
