@@ -150,6 +150,3 @@ media/
 
 # письма на электронку
 sent_emails/
-
-# миграции
-**/migrations/*
