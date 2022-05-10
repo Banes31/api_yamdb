@@ -6,15 +6,14 @@ from django.core.mail import send_mail
 from rest_framework import mixins, viewsets
 # from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.views import TokenObtainPairView
+# from rest_framework_simplejwt.views import TokenObtainPairView
 from users.models import User
 
 from api_yamdb.settings import ALL_STATUSES
 
 # from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
-from .serializers import (MailRequestSerializer, UserSerializer,
-                          GetTokenSerializer)
-
+from .serializers import (GetTokenSerializer, MailRequestSerializer,
+                          UserSerializer)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999
@@ -60,7 +59,6 @@ class GetTokenViewSet(CreateViewSet):
         if not self.queryset:
             raise ('Пользователь не найден')
         return super().perform_create(serializer)
-
 
 
 class UserViewSet(viewsets.ModelViewSet):

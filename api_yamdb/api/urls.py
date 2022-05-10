@@ -1,10 +1,12 @@
 from api.views import UserViewSet
 from django.urls import include, path
 from rest_framework import routers
+
+from .views import GetTokenViewSet, MailRequestViewSet
+
 # from rest_framework_simplejwt.views import (TokenObtainPairView,
 #                                             TokenRefreshView)
 
-from .views import MailRequestViewSet, GetTokenViewSet
 
 router = routers.DefaultRouter()
 # router.register('auth', AuthViewSet, basename='auth')
