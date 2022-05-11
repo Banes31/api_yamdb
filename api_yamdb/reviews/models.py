@@ -3,15 +3,74 @@ from django.db import models
 from users.models import User
 
 
+class Category(models.Model):
+    """Модель категории."""
+    name = models.CharField('Название категории', max_length=256)
+    slug = models.SlugField('Slug категории', unique=True)
+
+    def __str__(self):
+        return f'{self.name} {self.slug}'
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+
+class Genre(models.Model):
+    """Модель жанра."""
+    name = models.CharField('Название жанра', max_length=256)
+    slug = models.SlugField('Slug жанра', unique=True)
+
+    def __str__(self):
+        return f'{self.name} {self.slug}'
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
+
+class Title(models.Model):
+    """Модель произведения."""
+    name = models.CharField('Название произведения', max_length=256)
+    year = models.PositiveSmallIntegerField(
+        'Год выпуска произведения',
+        min_length=4,
+        max_length=4
+    )
+    description = models.TextField(
+        'Описание произведения',
+        null=True,
+        blank=True,
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        related_name='titles',
+        verbose_name='Жанр'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        verbose_name='Жанр',
+    )
+
+    def __str__(self):
+        return self.name[:15]
+
+    class Meta:
+        ordering = ('-year')
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+
 class Review(models.Model):
     """Модель отзыва."""
-    # TODO: Добавить Модель Titel
-    # title = models.ForeignKey(
-    #     to=Title,
-    #     on_delete=models.CASCADE,
-    #     related_name='reviews',
-    #     verbose_name='Название произведения'
-    # )
+    title = models.ForeignKey(
+        to=Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Название произведения'
+    )
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
@@ -36,6 +95,9 @@ class Review(models.Model):
         verbose_name='Дата отзыва'
     )
 
+    def __str__(self):
+        return f'{str(self.author)}: {str(self.score)} - {str(self.title)}'
+
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -45,9 +107,6 @@ class Review(models.Model):
                 fields=('title', 'author'),
                 name='unique_review'),
         )
-
-    def __str__(self):
-        return f'{str(self.author)}: {str(self.score)} - {str(self.title)}'
 
 
 class Comment(models.Model):
@@ -71,10 +130,10 @@ class Comment(models.Model):
         verbose_name='Дата комментария'
     )
 
+    def __str__(self):
+        return f'{self.author}: {self.text[:15]}'
+
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         ordering = ('-pub_date', '-review', '-id',)
-
-    def __str__(self):
-        return f'{self.author}: {self.text[:15]}'
