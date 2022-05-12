@@ -3,13 +3,11 @@ from random import randrange, seed
 
 from django.core.mail import send_mail
 from django.forms import ValidationError
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
-# from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-# from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Token, User
 
 from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
@@ -39,8 +37,7 @@ class MailRequestViewSet(CreateViewSet):
         serializer.save(
             username=serializer.initial_data['username'],
             email=serializer.initial_data['email'],
-            confirmation_code=code,
-            # role=User.USER
+            confirmation_code=code
         )
         send_mail(
             u'Код подтверждения для YAMDB',
