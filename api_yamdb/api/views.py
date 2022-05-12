@@ -1,26 +1,32 @@
 # -*- coding: UTF-8 -*-
 from random import randrange, seed
-from rest_framework.pagination import LimitOffsetPagination
+
+from api_yamdb.settings import ALL_STATUSES
 from django.core.mail import send_mail
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Token, User
-
-from api_yamdb.settings import ALL_STATUSES
-
-from reviews.models import Review, Comment, Title
+from reviews.models import (
+    Category,
+    Comment,
+    Genre,
+    Review,
+    Title,
+    Token,
+    User,
+)
 from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
 from .serializers import (
+    CommentSerializer,
     GetTokenSerializer,
     MailRequestSerializer,
     MeSerializer,
-    UsersSerializer,
     ReviewSerializer,
-    CommentSerializer
+    UsersSerializer,
 )
 
 MIN_VALUE_CODE = 100000
@@ -111,6 +117,7 @@ class MeViewSet(UpdateViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для отзыва."""
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
@@ -132,6 +139,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для комментария."""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrReadOnly,)
