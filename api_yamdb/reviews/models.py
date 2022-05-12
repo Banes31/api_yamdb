@@ -1,6 +1,56 @@
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from users.models import User
+from model_utils import Choices
+
+
+class User(AbstractUser):
+    """Модель юзера"""
+    ALL_STATUSES = Choices(
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
+    )
+    role = models.CharField(
+        'Роль пользователя',
+        max_length=1,
+        choices=ALL_STATUSES,
+        default='user',
+    )
+    first_name = models.CharField('first name', max_length=150, blank=True)
+    last_name = models.CharField('first name', max_length=150, blank=True)
+    email = models.EmailField('email', unique=True, max_length=254)
+    bio = models.TextField('Биография', blank=True)
+    confirmation_code = models.CharField(
+        'Код подтверждения',
+        max_length=6,
+    )
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+
+class Token(models.Model):
+    """Модель с токеном юзера"""
+    username = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        related_name='tokens')
+    confirmation_code = models.CharField(
+        'Код подтверждения',
+        max_length=6,
+    )
+    token = models.TextField('токен', blank=True)
+
+    def __str__(self):
+        return self.token
+
+    class Meta:
+        verbose_name = 'Токен'
+        verbose_name_plural = 'Токены'
 
 
 class Category(models.Model):
@@ -34,8 +84,6 @@ class Title(models.Model):
     name = models.CharField('Название произведения', max_length=256)
     year = models.PositiveSmallIntegerField(
         'Год выпуска произведения',
-        min_length=4,
-        max_length=4
     )
     description = models.TextField(
         'Описание произведения',
@@ -48,7 +96,7 @@ class Title(models.Model):
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
-        Category,
+        Category, null=True,
         on_delete=models.SET_NULL,
         related_name='titles',
         verbose_name='Жанр',
@@ -58,7 +106,7 @@ class Title(models.Model):
         return self.name[:15]
 
     class Meta:
-        ordering = ('-year')
+        ordering = ('-year',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
