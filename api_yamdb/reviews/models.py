@@ -5,7 +5,7 @@ from model_utils import Choices
 
 
 class User(AbstractUser):
-    """Модель юзера"""
+    """Модель юзера."""
     ALL_STATUSES = Choices(
         ('user', 'user'),
         ('moderator', 'moderator'),
@@ -35,7 +35,7 @@ class User(AbstractUser):
 
 
 class Token(models.Model):
-    """Модель с токеном юзера"""
+    """Модель с токеном юзера."""
     username = models.OneToOneField(
         User, on_delete=models.CASCADE,
         related_name='tokens')
@@ -82,9 +82,7 @@ class Genre(models.Model):
 class Title(models.Model):
     """Модель произведения."""
     name = models.CharField('Название произведения', max_length=256)
-    year = models.PositiveSmallIntegerField(
-        'Год выпуска произведения',
-    )
+    year = models.PositiveSmallIntegerField('Год выпуска произведения')
     description = models.TextField(
         'Описание произведения',
         null=True,
@@ -96,8 +94,9 @@ class Title(models.Model):
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
-        Category, null=True,
+        Category,
         on_delete=models.SET_NULL,
+        null=True,
         related_name='titles',
         verbose_name='Жанр',
     )
