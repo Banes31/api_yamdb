@@ -94,6 +94,22 @@ class UsersViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
 
+class MeViewSet(UpdateViewSet):
+    serializer_class = MeSerializer
+    permission_classes = (AllowAny, )
+
+    @action(detail=False, methods=['post'], url_path='me')
+    def perform_update(self, serializer):
+        # user = get_object_or_404(User, pk=self.request.user)
+        serializer.save(
+            username=serializer.initial_data['username'],
+            email=serializer.initial_data['email'],
+            first_name=serializer.initial_data['first_name'],
+            last_name=serializer.initial_data['last_name'],
+            bio=serializer.initial_data['bio']
+        )
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -137,19 +153,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review = self.get_review()
         return review.comments.all()
-
-
-class MeViewSet(UpdateViewSet):
-    serializer_class = MeSerializer
-    permission_classes = (AllowAny, )
-
-    @action(detail=False, methods=['post'], url_path='me')
-    def perform_update(self, serializer):
-        # user = get_object_or_404(User, pk=self.request.user)
-        serializer.save(
-            username=serializer.initial_data['username'],
-            email=serializer.initial_data['email'],
-            first_name=serializer.initial_data['first_name'],
-            last_name=serializer.initial_data['last_name'],
-            bio=serializer.initial_data['bio']
-        )
