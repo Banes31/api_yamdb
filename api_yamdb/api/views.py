@@ -10,7 +10,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Token, User
 
-from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
+from .permissions import (AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly,
+                          AdminOnly)
 from .serializers import (GetTokenSerializer, MailRequestSerializer,
                           MeSerializer, UsersSerializer)
 
@@ -34,10 +35,15 @@ class MailRequestViewSet(CreateViewSet):
     def perform_create(self, serializer):
         seed()
         code = str(randrange(MIN_VALUE_CODE, MAX_VALUE_CODE))
+        if self.user.is_superuser:
+            role = 'admin'
+        else:
+            role = 'user'
         serializer.save(
             username=serializer.initial_data['username'],
             email=serializer.initial_data['email'],
-            confirmation_code=code
+            confirmation_code=code,
+            role=role
         )
         send_mail(
             u'Код подтверждения для YAMDB',
@@ -74,7 +80,7 @@ class GetTokenViewSet(CreateViewSet):
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UsersSerializer
-    # permission_classes = (AuthorEditOrReadAll, )
+    permission_classes = (AdminOnly, )
 
     # def perform_create(self, serializer):
     #     serializer.save(author=self.request.user)
