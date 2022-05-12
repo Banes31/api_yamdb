@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
 from random import randrange, seed
 
-from api_yamdb.settings import ALL_STATUSES
 from django.core.mail import send_mail
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
