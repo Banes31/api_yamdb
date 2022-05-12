@@ -2,24 +2,30 @@
 from random import randrange, seed
 
 from django.core.mail import send_mail
-# from django.shortcuts import get_object_or_404, render
+from django.forms import ValidationError
+from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework import mixins, viewsets
 # from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 # from rest_framework_simplejwt.views import TokenObtainPairView
-from users.models import User
+from users.models import User, Token
+from rest_framework.decorators import action
 
-from api_yamdb.settings import ALL_STATUSES
 
-# from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
+from .permissions import AuthorEditOrReadAll, AuthorOrReadOnly, ReadOnly
 from .serializers import (GetTokenSerializer, MailRequestSerializer,
-                          UserSerializer)
+                          UsersSerializer, MeSerializer)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999
 
 
 class CreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    pass
+
+
+class UpdateViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     pass
 
 
@@ -35,7 +41,8 @@ class MailRequestViewSet(CreateViewSet):
             username=serializer.initial_data['username'],
             email=serializer.initial_data['email'],
             confirmation_code=code,
-            role=ALL_STATUSES[0])
+            # role=User.USER
+        )
         send_mail(
             u'Код подтверждения для YAMDB',
             u'Сделайте POST запрос '
@@ -49,21 +56,28 @@ class MailRequestViewSet(CreateViewSet):
 
 
 class GetTokenViewSet(CreateViewSet):
-    queryset = User.objects.filter(
-        username='username',
-        confirmation_code='confirmation_code')
     serializer_class = GetTokenSerializer
     permission_classes = (AllowAny, )
 
     def perform_create(self, serializer):
-        if not self.queryset:
-            raise ('Пользователь не найден')
-        return super().perform_create(serializer)
+        user = get_object_or_404(
+            User,
+            username=serializer.initial_data['username'],
+            confirmation_code=serializer.initial_data['confirmation_code'],
+        )
+        refresh = RefreshToken.for_user(user)
+        token = str(refresh.access_token)
+        serializer.save(
+            username=user,
+            confirmation_code=serializer.initial_data['confirmation_code'],
+            token=token
+        )
+        return token
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UsersSerializer
     # permission_classes = (AuthorEditOrReadAll, )
 
     # def perform_create(self, serializer):
@@ -73,3 +87,19 @@ class UserViewSet(viewsets.ModelViewSet):
     #     if self.action == 'retrieve':
     #         return (ReadOnly(),)
     #     return super().get_permissions()
+
+
+class MeViewSet(UpdateViewSet):
+    serializer_class = MeSerializer
+    permission_classes = (AllowAny, )
+
+    @action(detail=False, methods=['post'], url_path='me')
+    def perform_update(self, serializer):
+        # user = get_object_or_404(User, pk=self.request.user)
+        serializer.save(
+            username=serializer.initial_data['username'],
+            email=serializer.initial_data['email'],
+            first_name=serializer.initial_data['first_name'],
+            last_name=serializer.initial_data['last_name'],
+            bio=serializer.initial_data['bio']
+        )
