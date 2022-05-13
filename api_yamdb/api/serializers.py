@@ -1,7 +1,8 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.relations import SlugRelatedField
-from reviews.models import Category, Genre, Title, Token, User
+from reviews.models import Category, Genre, Title, User
 
 
 class ChoicesField(serializers.Field):
@@ -16,7 +17,7 @@ class ChoicesField(serializers.Field):
         return getattr(self._choices, data)
 
 
-class MailRequestSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
             'email',
@@ -35,28 +36,24 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('username', 'confirmation_code', 'token')
-        model = Token
+        model = User
 
     def validate(self, data):
-        find_users = User.objects.filter(
-            username=self.initial_data['username'],
-            confirmation_code=self.initial_data['confirmation_code'])
-        if find_users:
-            find_tokens = Token.objects.filter(
-                username=find_users[0])
-        print(find_users)
-        if not find_users:
+        find_user = get_object_or_404(
+            User, username=self.initial_data['username'])
+
+
+        if (
+            not find_user.is_superuser and (
+                find_user.confirmation_code != self.initial_data['confirmation_code']
+            )
+        ):
             raise NotFound('Пользователь не найден')
-        if find_tokens:
-            raise serializers.ValidationError('Токен уже есть!')
         return super().validate(data)
 
-    def to_representation(self, instance):
-        return {'token': instance.token}
 
 
 class UsersSerializer(serializers.ModelSerializer):
-    role = ChoicesField(choices=User.ALL_STATUSES)
 
     class Meta:
         fields = (
