@@ -4,11 +4,13 @@ certifi==2021.10.8
 charset-normalizer==2.0.12
 colorama==0.4.4
 Django==2.2.16
+django-filter==21.1
 django-model-utils==4.2.0
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.1.0
 flake8==4.0.1
 idna==3.3
+importlib-metadata==4.2.0
 iniconfig==1.1.1
 isort==5.10.1
 mccabe==0.6.1
@@ -26,4 +28,6 @@ pytz==2022.1
 requests==2.26.0
 sqlparse==0.4.2
 toml==0.10.2
+typing_extensions==4.2.0
 urllib3==1.26.9
+zipp==3.8.0
