@@ -1,21 +1,42 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from model_utils import Choices
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
+
+
+def my_username_validator(value):
+    if value != r'^[\w.@+-]+$' and value == 'me':
+        raise ValidationError(
+            '%(value)s is not good name',
+            params={'value': value},
+        )
 
 
 class User(AbstractUser):
     """Модель юзера."""
+
     ALL_STATUSES = Choices(
         ('user', 'user'),
         ('moderator', 'moderator'),
         ('admin', 'admin'),
     )
+
+    username = models.CharField(
+        "Username",
+        max_length=150,
+        unique=True,
+        help_text=("Required. 150 characters or fewer. Letters, and digits only."),
+        validators=[my_username_validator]
+    )
     role = models.CharField(
         'Роль пользователя',
-        max_length=1,
+        max_length=16,
         choices=ALL_STATUSES,
         default='user',
+        blank=True
     )
     first_name = models.CharField('first name', max_length=150, blank=True)
     last_name = models.CharField('first name', max_length=150, blank=True)
@@ -24,7 +45,9 @@ class User(AbstractUser):
     confirmation_code = models.CharField(
         'Код подтверждения',
         max_length=6,
+        blank=True
     )
+    token = models.TextField('токен', blank=True)
 
     def __str__(self):
         return self.username
@@ -32,25 +55,6 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-
-
-class Token(models.Model):
-    """Модель с токеном юзера."""
-    username = models.OneToOneField(
-        User, on_delete=models.CASCADE,
-        related_name='tokens')
-    confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=6,
-    )
-    token = models.TextField('токен', blank=True)
-
-    def __str__(self):
-        return self.token
-
-    class Meta:
-        verbose_name = 'Токен'
-        verbose_name_plural = 'Токены'
 
 
 class Category(models.Model):
