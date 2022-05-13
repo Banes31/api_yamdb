@@ -114,6 +114,20 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
 
+class GenreTitle(models.Model):
+    title_id = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='titles'
+    )
+    genre_id = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='genres'
+    )
+
+
 class Review(models.Model):
     """Модель отзыва."""
     title = models.ForeignKey(

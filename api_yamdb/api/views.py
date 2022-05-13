@@ -1,6 +1,8 @@
 from random import randrange, seed
 
 from django.core.mail import send_mail
+from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
@@ -12,10 +14,25 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
-from .permissions import (AdminOnly, AuthorEditOrReadAll, AuthorOrReadOnly,
-                          ReadOnly)
-from .serializers import (CommentSerializer, GetTokenSerializer, MeSerializer,
-                          ReviewSerializer, SignUpSerializer, UsersSerializer)
+from .permissions import (
+    AdminOnly,
+    AuthorEditOrReadAll,
+    AuthorOrReadOnly,
+    IsAdminOrReadOnly,
+    ReadOnly
+)
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    MeSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
+    UsersSerializer,
+)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999
@@ -109,7 +126,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
 class Me(APIView):
     permission_classes = (AllowAny, )
-    
+
     def update(self, request):
         return ()
 
@@ -123,6 +140,41 @@ class Me(APIView):
     #         last_name=serializer.initial_data['last_name'],
     #         bio=serializer.initial_data['bio']
     #     )
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """Вьюсет для обработки CRUD запросов к эндпоинту category/."""
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    """Вьюсет для обработки CRUD запросов к эндпоинту genre/."""
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для обработки CRUD запросов к эндпоинту title/."""
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all()
+    permission_classes = (AuthorEditOrReadAll,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name', 'year',)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
