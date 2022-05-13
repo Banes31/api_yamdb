@@ -13,7 +13,6 @@ def my_username_validator(value):
             '%(value)s is not good name',
             params={'value': value},
         )
-        print(value)
 
 
 class User(AbstractUser):
