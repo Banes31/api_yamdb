@@ -24,6 +24,10 @@ class User(AbstractUser):
         ('admin', 'admin'),
     )
 
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+
     username = models.CharField(
         "Username",
         max_length=150,
@@ -48,6 +52,14 @@ class User(AbstractUser):
         blank=True
     )
     token = models.TextField('токен', blank=True)
+
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN or self.is_staff
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     def __str__(self):
         return self.username
@@ -176,7 +188,7 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Модель комментария к отзыву."""
-    review = models.ForeignKey(
+    review_id = models.ForeignKey(
         to=Review,
         on_delete=models.CASCADE,
         related_name='comments',
@@ -201,4 +213,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ('-pub_date', '-review', '-id',)
+        # ordering = ('-pub_date', '-review_id', '-id',)
