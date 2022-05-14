@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -19,7 +19,8 @@ from .permissions import (
     AuthorEditOrReadAll,
     AuthorOrReadOnly,
     IsAdminOrReadOnly,
-    ReadOnly
+    ReadOnly,
+    IsAuthorOrAdminOrModeratorOrReadOnly,
 )
 from .serializers import (
     CategorySerializer,
@@ -182,7 +183,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrAdminOrModeratorOrReadOnly,
+    )
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -203,20 +207,22 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для комментария."""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrAdminOrModeratorOrReadOnly,
+    )
 
     def get_review(self):
         return get_object_or_404(
             Review,
-            id=self.kwargs['review_id'],
-            title__id=self.kwargs['title_id']
+            id=self.kwargs['review_id']
         )
 
     def perform_create(self, serializer):
         review = self.get_review()
         serializer.save(
             author=self.request.user,
-            review=review
+            review_id=review
         )
 
     def get_queryset(self):
