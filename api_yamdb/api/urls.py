@@ -9,6 +9,8 @@ from .views import (
     Token,
     UsersViewSet,
     TitleViewSet,
+    ReviewViewSet,
+    CommentViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -16,6 +18,14 @@ router.register('users', UsersViewSet, basename='users')
 # router.register('users/me', MeViewSet, basename='me')
 # router.register('auth/signup', SignUpView, basename='signup')
 # router.register('auth/token', GetTokenViewSet, basename='token')
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet, basename='comments'
+)
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews',
+    ReviewViewSet, basename='reviews'
+)
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
 router.register('titles', TitleViewSet, basename='titles')
