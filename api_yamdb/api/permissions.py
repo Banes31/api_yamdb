@@ -11,7 +11,8 @@ class AdminOnly(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return (request.user.is_admin or request.user.is_staff)
+        user = request.user
+        return (user.role == 'admin' or user.is_staff)
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
@@ -51,16 +52,16 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         if request.user.is_authenticated and (
-            request.user.is_admin or request.user.is_staff
+            request.user.role == 'admin' or request.user.is_staff
         ):
-            return request.user.is_admin
+            return request.user.role == 'admin'
         return False
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
         if request.user.is_authenticated and (
-            request.user.is_admin or request.user.is_staff
+            request.user.role == 'admin' or request.user.is_staff
         ):
-            return request.user.is_admin
+            return request.user.role == 'admin'
         return False
