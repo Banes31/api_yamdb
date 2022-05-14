@@ -2,11 +2,11 @@ from random import randrange, seed
 
 from django.core.mail import send_mail
 from django.db.models import Avg
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -14,17 +14,27 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.filters import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
-from .permissions import (AdminOnly, AuthorEditOrReadAll, AuthorOrReadOnly,
-                          IsAdminOrReadOnly,
-                          IsAuthorOrAdminOrModeratorOrReadOnly, MeOnly,
-                          ReadOnly)
-from .serializers import (AdminSerializer, CategorySerializer,
-                          CommentSerializer, GenreSerializer,
-                          GetTokenSerializer, ReviewSerializer,
-                          SignUpSerializer, TitleReadSerializer,
-                          TitleWriteSerializer, UsersSerializer)
+from .mixins import CustomViewSet
+from .permissions import (
+    AdminOnly,
+    IsAdminOrReadOnly,
+    IsAuthorOrAdminOrModeratorOrReadOnly
+)
+from .serializers import (
+    AdminSerializer,
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
+    UsersSerializer
+)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999
@@ -33,14 +43,6 @@ MAX_VALUE_CODE = 999999
 def code_gen():
     seed()
     return str(randrange(MIN_VALUE_CODE, MAX_VALUE_CODE))
-
-
-class CreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    pass
-
-
-class UpdateViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
-    pass
 
 
 class SignUp(APIView):
@@ -84,16 +86,16 @@ class Token(APIView):
     permission_classes = (AllowAny, )
 
     def post(self, request):
-            serializer = GetTokenSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            user = get_object_or_404(User, username=request.data['username'])
-            if not user.is_superuser:
-                user = get_object_or_404(
-                    User, username=request.data['username'],
-                    confirmation_code=request.data['confirmation_code']
-                )
-            else:
-                user.role = 'admin'
+        serializer = GetTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(User, username=request.data['username'])
+        if not user.is_superuser:
+            user = get_object_or_404(
+                User, username=request.data['username'],
+                confirmation_code=request.data['confirmation_code']
+            )
+        else:
+            user.role = 'admin'
             refresh = RefreshToken.for_user(user)
             token = str(refresh.access_token)
             user.token = token
@@ -131,23 +133,23 @@ class UsersViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    """Вьюсет для обработки CRUD запросов к эндпоинту category/."""
+class CategoryViewSet(CustomViewSet):
+    """Вьюсет для обработки к эндпоинту category/."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
+    search_fields = ('name', )
     lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    """Вьюсет для обработки CRUD запросов к эндпоинту genre/."""
+class GenreViewSet(CustomViewSet):
+    """Вьюсет для обработки запросов к эндпоинту genre/."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
+    search_fields = ('name', )
     lookup_field = 'slug'
 
 
@@ -156,9 +158,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).all()
-    permission_classes = (AuthorEditOrReadAll,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year',)
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
+    search_fields = ('name', )
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
