@@ -1,10 +1,10 @@
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.contrib.auth.validators import ASCIIUsernameValidator
+from django.contrib.auth.validators import (ASCIIUsernameValidator,
+                                            UnicodeUsernameValidator)
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from model_utils import Choices
-from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.exceptions import ValidationError
 
 
 def my_username_validator(value):
