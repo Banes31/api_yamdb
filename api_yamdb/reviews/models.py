@@ -1,6 +1,4 @@
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.contrib.auth.validators import (ASCIIUsernameValidator,
-                                            UnicodeUsernameValidator)
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -32,7 +30,9 @@ class User(AbstractUser):
         "Username",
         max_length=150,
         unique=True,
-        help_text=("Required. 150 characters or fewer. Letters, and digits only."),
+        help_text=(
+            "Required. 150 characters or fewer. Letters, and digits only."
+        ),
         validators=[my_username_validator]
     )
     role = models.CharField(
@@ -213,4 +213,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        # ordering = ('-pub_date', '-review_id', '-id',)
+        ordering = ('-pub_date', '-review_id', '-id',)
