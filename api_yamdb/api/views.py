@@ -13,12 +13,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
+from rest_framework.permissions import IsAuthenticated
 
 from .permissions import (
     AdminOnly,
     AuthorEditOrReadAll,
     AuthorOrReadOnly,
     IsAdminOrReadOnly,
+    MeOnly,
     ReadOnly
 )
 from .serializers import (
@@ -26,11 +28,11 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     GetTokenSerializer,
-    MeSerializer,
     ReviewSerializer,
     SignUpSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
+    AdminSerializer,
     UsersSerializer,
 )
 
@@ -64,7 +66,7 @@ class SignUp(APIView):
         if user_set:
             user = user_set[0]
         else:
-            # serializer.is_valid(raise_exception=True)
+            serializer.is_valid(raise_exception=True)
             user = serializer.save(
                 confirmation_code=code_gen(),
             )
@@ -112,34 +114,31 @@ class Token(APIView):
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UsersSerializer
-    permission_classes = (AdminOnly, )
+    serializer_class = AdminSerializer
+    permission_classes = (AdminOnly, IsAuthenticated)
+    lookup_field = 'username'
 
     def perform_create(self, serializer):
         serializer.save(confirmation_code=code_gen())
 
-    # def get_permissions(self):
-    #     if self.action == 'retrieve':
-    #         return (ReadOnly(),)
-    #     return super().get_permissions()
-
-
-class Me(APIView):
-    permission_classes = (AllowAny, )
-
-    def update(self, request):
-        return ()
-
-    # @action(detail=False, methods=['post'], url_path='me')
-    # def perform_update(self, serializer):
-    #     # user = get_object_or_404(User, pk=self.request.user)
-    #     serializer.save(
-    #         username=serializer.initial_data['username'],
-    #         email=serializer.initial_data['email'],
-    #         first_name=serializer.initial_data['first_name'],
-    #         last_name=serializer.initial_data['last_name'],
-    #         bio=serializer.initial_data['bio']
-    #     )
+    @action(
+        methods=['GET', 'PATCH'], detail=False,
+        url_path='me',
+        permission_classes=[IsAuthenticated],
+    )
+    def user_info(self, request):
+        serializer = AdminSerializer(request.user)
+        if request.method == 'PATCH':
+            if request.user.role == 'admin':
+                serializer = AdminSerializer(
+                    request.user, data=request.data, partial=True)
+            else:
+                serializer = UsersSerializer(
+                    request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

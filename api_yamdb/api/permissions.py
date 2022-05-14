@@ -7,12 +7,12 @@ class AdminOnly(permissions.BasePermission):
         if user.is_anonymous:
             return False
         return (
-            user.role == 'admin' or user.is_staff
+            user.role == 'admin' or user.is_superuser
         )
 
     def has_object_permission(self, request, view, obj):
         user = request.user
-        return (user.role == 'admin' or user.is_staff)
+        return (user.role == 'admin' or user.is_superuser)
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
@@ -65,3 +65,13 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         ):
             return request.user.role == 'admin'
         return False
+
+
+class MeOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        return not user.is_anonymous
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        return (user.username == obj.username)
