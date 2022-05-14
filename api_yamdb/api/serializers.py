@@ -1,10 +1,12 @@
+import json
 from xml.dom import ValidationErr
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.relations import SlugRelatedField
+
 from reviews.models import Category, Comment, Genre, Review, Title, User
-import json
 
 
 class ChoicesField(serializers.Field):

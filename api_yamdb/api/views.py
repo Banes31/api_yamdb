@@ -2,41 +2,29 @@ from random import randrange, seed
 
 from django.core.mail import send_mail
 from django.db.models import Avg
-from django_filters.rest_framework import DjangoFilterBackend
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Review, Title, User
-from rest_framework.permissions import IsAuthenticated
 
-from .permissions import (
-    AdminOnly,
-    AuthorEditOrReadAll,
-    AuthorOrReadOnly,
-    IsAdminOrReadOnly,
-    MeOnly,
-    ReadOnly
-    ReadOnly,
-    IsAuthorOrAdminOrModeratorOrReadOnly,
-)
-from .serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    GetTokenSerializer,
-    ReviewSerializer,
-    SignUpSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-    AdminSerializer,
-    UsersSerializer,
-)
+from reviews.models import Category, Comment, Genre, Review, Title, User
+
+from .permissions import (AdminOnly, AuthorEditOrReadAll, AuthorOrReadOnly,
+                          IsAdminOrReadOnly,
+                          IsAuthorOrAdminOrModeratorOrReadOnly, MeOnly,
+                          ReadOnly)
+from .serializers import (AdminSerializer, CategorySerializer,
+                          CommentSerializer, GenreSerializer,
+                          GetTokenSerializer, ReviewSerializer,
+                          SignUpSerializer, TitleReadSerializer,
+                          TitleWriteSerializer, UsersSerializer)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999
