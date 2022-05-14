@@ -75,3 +75,17 @@ class MeOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
         return (user.username == obj.username)
+class IsAuthorOrAdminOrModeratorOrReadOnly(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if (
+            request.user.is_anonymous
+            and request.method in permissions.SAFE_METHODS
+        ):
+            return True
+        return (
+            request.user.is_authenticated
+            and request.user == obj.author
+            or request.user.is_moderator
+            or request.user.is_admin
+        )
