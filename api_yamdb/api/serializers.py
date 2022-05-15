@@ -76,7 +76,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    score = serializers.IntegerField(max_value=10, min_value=0)
 
     class Meta:
         model = Review
@@ -87,7 +86,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         title = self.context['view'].kwargs.get('title_id')
         user = self.context['request'].user
         if self.context['request'].method == 'POST':
-            if Review.objects.filter(title=title, author=user).exists():
+            if Review.objects.filter(
+                title=title,
+                author=user,
+                title__id=self.context['view'].kwargs.get('title_id')
+            ).exists():
                 raise serializers.ValidationError(
                     'Нельзя добавлять более одного отзыва!'
                 )
