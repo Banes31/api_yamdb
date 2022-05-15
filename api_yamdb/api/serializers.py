@@ -6,7 +6,7 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class ChoicesField(serializers.Field):
-    """Обработка выбора значений поля role для users"""
+    """Обработка выбора значений поля role для users."""
     def __init__(self, choices, **kwargs):
         self._choices = choices
         super(ChoicesField, self).__init__(**kwargs)
@@ -19,7 +19,7 @@ class ChoicesField(serializers.Field):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания аккаунта в модели user"""
+    """Сериализатор для создания аккаунта в модели user."""
     class Meta:
         fields = (
             'email',
@@ -28,14 +28,14 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
 
     def validate_username(self, value):
-        """Проверка username на me"""
+        """Проверка username на me."""
         if value == 'me':
             raise serializers.ValidationError('Нельзя использовать me!')
         return value
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
-    """Сериализатор получения токена, модель user"""
+    """Сериализатор получения токена, модель user."""
     username = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -43,7 +43,7 @@ class GetTokenSerializer(serializers.ModelSerializer):
         model = User
 
     def validate(self, data):
-        """Проверка валидности полей"""
+        """Проверка валидности полей."""
         if 'username' not in self.initial_data:
             raise ValidationError()
         find_user = get_object_or_404(
@@ -60,7 +60,7 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    """Сериализатор для админа, модель users"""
+    """Сериализатор для админа, модель users."""
     class Meta:
         fields = (
             'username', 'email', 'first_name',
