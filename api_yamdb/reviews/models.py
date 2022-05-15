@@ -1,16 +1,8 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from .validators import my_username_validator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from model_utils import Choices
-
-
-def my_username_validator(value):
-    if value != r'^[\w.@+-]+$' and value == 'me':
-        raise ValidationError(
-            '%(value)s is not good name',
-            params={'value': value},
-        )
 
 
 class User(AbstractUser):
@@ -25,9 +17,8 @@ class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'
-
     username = models.CharField(
-        "Username",
+        verbose_name='Имя пользователя',
         max_length=150,
         unique=True,
         help_text=(
@@ -36,22 +27,31 @@ class User(AbstractUser):
         validators=[my_username_validator]
     )
     role = models.CharField(
-        'Роль пользователя',
+        verbose_name='Роль пользователя',
         max_length=16,
         choices=ALL_STATUSES,
         default='user',
         blank=True
     )
-    first_name = models.CharField('first name', max_length=150, blank=True)
-    last_name = models.CharField('first name', max_length=150, blank=True)
-    email = models.EmailField('email', unique=True, max_length=254)
-    bio = models.TextField('Биография', blank=True)
+    first_name = models.CharField(
+        verbose_name='Имя', max_length=150, blank=True
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия', max_length=150, blank=True
+    )
+    email = models.EmailField(
+        verbose_name='email', unique=True, max_length=254
+    )
+    bio = models.TextField(
+        verbose_name='Биография', blank=True
+    )
     confirmation_code = models.CharField(
-        'Код подтверждения',
+        verbose_name='Код подтверждения',
         max_length=6,
         blank=True
     )
-    token = models.TextField('токен', blank=True)
+    token = models.TextField(
+        verbose_name='токен', blank=True)
 
     @property
     def is_admin(self):
