@@ -71,8 +71,8 @@ class User(AbstractUser):
 
 class Category(models.Model):
     """Модель категории."""
-    name = models.CharField('Название категории', max_length=256)
-    slug = models.SlugField('Slug категории', unique=True)
+    name = models.CharField(verbose_name='Название категории', max_length=256)
+    slug = models.SlugField(verbose_name='Slug категории', unique=True)
 
     def __str__(self):
         return f'{self.name} {self.slug}'
@@ -84,8 +84,8 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель жанра."""
-    name = models.CharField('Название жанра', max_length=256)
-    slug = models.SlugField('Slug жанра', unique=True)
+    name = models.CharField(verbose_name='Название жанра', max_length=256)
+    slug = models.SlugField(verbose_name='Slug жанра', unique=True)
 
     def __str__(self):
         return f'{self.name} {self.slug}'
@@ -97,12 +97,16 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Модель произведения."""
-    name = models.CharField('Название произведения', max_length=256)
-    year = models.PositiveSmallIntegerField('Год выпуска произведения')
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название произведения'
+    )
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год выпуска произведения')
     description = models.TextField(
-        'Описание произведения',
         null=True,
         blank=True,
+        verbose_name='Описание произведения'
     )
     genre = models.ManyToManyField(
         Genre,
@@ -114,29 +118,34 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='titles',
-        verbose_name='Жанр',
+        verbose_name='Категория'
     )
 
     def __str__(self):
         return self.name[:15]
 
     class Meta:
-        ordering = ('-year',)
+        ordering = ('name', '-year',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        indexes = [
+            models.Index(fields=['year'], name='year_idx'),
+        ]
 
 
 class GenreTitle(models.Model):
     title_id = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='titles'
+        related_name='titles',
+        verbose_name='Произведение'
     )
     genre_id = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='genres'
+        related_name='genres',
+        verbose_name='Жанр'
     )
 
 
