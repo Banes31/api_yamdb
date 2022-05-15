@@ -20,7 +20,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
 
     def validate(self, data):
-        """Проверка username на me."""
+        """Проверка данных сериализатора."""
         if self.initial_data['username'] == '':
             raise serializers.ValidationError('Это поле не может быть пустым!')
         if self.initial_data['username'] == 'me':
