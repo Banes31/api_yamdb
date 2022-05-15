@@ -2,8 +2,15 @@ import csv
 
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
-from reviews.models import (Category, Comment, Genre, Review,  # GenreTitle,
-                            Title, User)
+from reviews.models import (
+    Category,
+    Comment,
+    Genre,
+    Review,
+    GenreTitle,
+    Title,
+    User
+)
 
 
 class Command(BaseCommand):
@@ -132,28 +139,28 @@ class Command(BaseCommand):
         finally:
             csvfile.close()
 
-    # def load_to_genre_title_table(self):
-    #     """Заполнение таблицы с жанрами - произведениями."""
-    #     try:
-    #         with open(
-    #             'static/data/genre_title.csv', encoding='utf-8'
-    #         ) as csvfile:
-    #             reader = csv.reader(csvfile, delimiter=',')
-    #             for row_num, row in enumerate(reader):
-    #                 if row_num == 0:
-    #                     continue
-    #                 else:
-    #                     GenreTitle.objects.get_or_create(
-    #                         id=row[0],
-    #                         title_id=get_object_or_404(Title, id=row[1]),
-    #                         genre_id=get_object_or_404(Genre, id=row[2])
-    #                     )
-    #         return self.stdout.write('Загруженно без ошибок.')
-    #     except Exception as error:
-    #         self.stderr.write('При загрузки возникла ошибка:')
-    #         raise Exception(error)
-    #     finally:
-    #         csvfile.close()
+    def load_to_genre_title_table(self):
+        """Заполнение таблицы с жанрами - произведениями."""
+        try:
+            with open(
+                'static/data/genre_title.csv', encoding='utf-8'
+            ) as csvfile:
+                reader = csv.reader(csvfile, delimiter=',')
+                for row_num, row in enumerate(reader):
+                    if row_num == 0:
+                        continue
+                    else:
+                        GenreTitle.objects.get_or_create(
+                            id=row[0],
+                            title_id=get_object_or_404(Title, id=row[1]),
+                            genre_id=get_object_or_404(Genre, id=row[2])
+                        )
+            return self.stdout.write('Загруженно без ошибок.')
+        except Exception as error:
+            self.stderr.write('При загрузки возникла ошибка:')
+            raise Exception(error)
+        finally:
+            csvfile.close()
 
     def load_to_comments_table(self):
         """Заполнение таблицы комментариев."""
