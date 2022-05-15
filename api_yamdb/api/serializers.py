@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
@@ -21,13 +20,13 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Проверка данных сериализатора."""
-        if self.initial_data['username'] == '':
+        if self.initial_data['username'] is None:
             raise serializers.ValidationError('Это поле не может быть пустым!')
         if self.initial_data['username'] == 'me':
             raise serializers.ValidationError('Нельзя использовать me!')
         if User.objects.filter(username=self.initial_data['username']):
             raise serializers.ValidationError('Такой username уже есть!')
-        if self.initial_data['email'] is NULL:
+        if self.initial_data['email'] is None:
             raise serializers.ValidationError('Это поле не может быть пустым!')
         if User.objects.filter(email=self.initial_data['email']):
             raise serializers.ValidationError('Такой email уже есть!')
