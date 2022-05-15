@@ -10,9 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
-  AllowAny,
-  IsAuthenticated,
-  IsAuthenticatedOrReadOnly
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,21 +21,21 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .mixins import CustomViewSet
 from .permissions import (
-  AdminOnly,
-  IsAdminOrReadOnly,
-  IsAuthorOrAdminOrModeratorOrReadOnly
+    AdminOnly,
+    IsAdminOrReadOnly,
+    IsAuthorOrAdminOrModeratorOrReadOnly
 )
 from .serializers import (
-  AdminSerializer,
-  CategorySerializer,
-  CommentSerializer,
-  GenreSerializer,
-  GetTokenSerializer,
-  ReviewSerializer,
-  SignUpSerializer,
-  TitleReadSerializer,
-  TitleWriteSerializer,
-  UsersSerializer
+    AdminSerializer,
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
+    UsersSerializer
 )
 
 MIN_VALUE_CODE = 100000
