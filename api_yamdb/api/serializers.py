@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
@@ -6,21 +7,11 @@ from rest_framework.relations import SlugRelatedField
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
-class ChoicesField(serializers.Field):
-    """Обработка выбора значений поля role для users."""
-    def __init__(self, choices, **kwargs):
-        self._choices = choices
-        super(ChoicesField, self).__init__(**kwargs)
-
-    def to_representation(self, obj):
-        return self._choices[obj]
-
-    def to_internal_value(self, data):
-        return getattr(self._choices, data)
-
-
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор для создания аккаунта в модели user."""
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
+
     class Meta:
         fields = (
             'email',
@@ -28,11 +19,19 @@ class SignUpSerializer(serializers.ModelSerializer):
         )
         model = User
 
-    def validate_username(self, value):
-        """Проверка username на me."""
-        if value == 'me':
+    def validate(self, data):
+        """Проверка данных сериализатора."""
+        if self.initial_data['username'] == '':
+            raise serializers.ValidationError('Это поле не может быть пустым!')
+        if self.initial_data['username'] == 'me':
             raise serializers.ValidationError('Нельзя использовать me!')
-        return value
+        if User.objects.filter(username=self.initial_data['username']):
+            raise serializers.ValidationError('Такой username уже есть!')
+        if self.initial_data['email'] is NULL:
+            raise serializers.ValidationError('Это поле не может быть пустым!')
+        if User.objects.filter(email=self.initial_data['email']):
+            raise serializers.ValidationError('Такой email уже есть!')
+        return data
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
