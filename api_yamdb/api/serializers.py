@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.relations import SlugRelatedField
@@ -152,6 +153,17 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+    def validate_year(self, value):
+        """Проверка, что год выпуска не может быть больше текущего."""
+        now = timezone.now().year
+        if value > now:
+            raise ValidationError(
+                f'Год выпуска {value} не может быть больше текущего {now}!'
+            )
+        if value is None:
+            raise ValidationError('Год выпуска обязателен для заполнения!')
+        return value
 
 
 class UsersSerializer(serializers.ModelSerializer):
