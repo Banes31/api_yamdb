@@ -1,5 +1,6 @@
 from random import randrange, seed
 
+from api.filters import TitleFilter
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -13,28 +14,16 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from api.filters import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .mixins import CustomViewSet
-from .permissions import (
-    AdminOnly,
-    IsAdminOrReadOnly,
-    IsAuthorOrAdminOrModeratorOrReadOnly
-)
-from .serializers import (
-    AdminSerializer,
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    GetTokenSerializer,
-    ReviewSerializer,
-    SignUpSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-    UsersSerializer
-)
+from .permissions import (AdminOnly, IsAdminOrReadOnly,
+                          IsAuthorOrAdminOrModeratorOrReadOnly)
+from .serializers import (AdminSerializer, CategorySerializer,
+                          CommentSerializer, GenreSerializer,
+                          GetTokenSerializer, ReviewSerializer,
+                          SignUpSerializer, TitleReadSerializer,
+                          TitleWriteSerializer, UsersSerializer)
 
 MIN_VALUE_CODE = 100000
 MAX_VALUE_CODE = 999999

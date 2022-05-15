@@ -31,7 +31,7 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
         help_text=(
-            "Required. 150 characters or fewer. Letters, and digits only."
+            "Required. 150 char or fewer. Letters, and digits only."
         ),
         validators=[my_username_validator]
     )
