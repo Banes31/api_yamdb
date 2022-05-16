@@ -164,3 +164,5 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 
 AUTH_USER_MODEL = 'reviews.User'
+
+EMAIL_FROM = 'from@yamdb.com'

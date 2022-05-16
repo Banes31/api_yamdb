@@ -18,19 +18,25 @@ class SignUpSerializer(serializers.ModelSerializer):
         )
         model = User
 
-    def validate(self, data):
+    def validate_email(self, value):
+        """Проверка данных сериализатора."""
+        if self.initial_data['email'] is None:
+            raise serializers.ValidationError('Это поле не может быть пустым!')
+        if User.objects.filter(email=self.initial_data['email']).exists():
+            raise serializers.ValidationError('Такой email уже есть!')
+        return value
+
+    def validate_username(self, value):
         """Проверка данных сериализатора."""
         if self.initial_data['username'] is None:
             raise serializers.ValidationError('Это поле не может быть пустым!')
         if self.initial_data['username'] == 'me':
             raise serializers.ValidationError('Нельзя использовать me!')
-        if User.objects.filter(username=self.initial_data['username']):
+        if User.objects.filter(
+            username=self.initial_data['username']
+        ).exists():
             raise serializers.ValidationError('Такой username уже есть!')
-        if self.initial_data['email'] is None:
-            raise serializers.ValidationError('Это поле не может быть пустым!')
-        if User.objects.filter(email=self.initial_data['email']):
-            raise serializers.ValidationError('Такой email уже есть!')
-        return data
+        return value
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
