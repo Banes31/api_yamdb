@@ -1,6 +1,6 @@
-from random import randrange, seed
-
 from api.filters import TitleFilter
+from api.utils import code_gen
+from api_yamdb.settings import EMAIL_FROM
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -38,14 +38,6 @@ from .serializers import (
     UsersSerializer
 )
 
-MIN_VALUE_CODE = 100000
-MAX_VALUE_CODE = 999999
-
-
-def code_gen():
-    seed()
-    return str(randrange(MIN_VALUE_CODE, MAX_VALUE_CODE))
-
 
 class SignUp(APIView):
     permission_classes = (AllowAny, )
@@ -53,17 +45,11 @@ class SignUp(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user_set = User.objects.filter(
+        user = User.objects.get_or_create(
             username=request.data['username'],
             email=request.data['email']
-        )
-        if user_set:
-            user = user_set[0]
-        else:
-            serializer.is_valid(raise_exception=True)
-            user = serializer.save(
-                confirmation_code=code_gen(),
-            )
+        )[0]
+        user.confirmation_code = code_gen()
         if not request.user.is_superuser:
             send_mail(
                 u'Код подтверждения для YAMDB',
@@ -71,7 +57,7 @@ class SignUp(APIView):
                 f'"username": "{user.username}", '
                 f'"confirmation_code": "{user.confirmation_code}" '
                 u'на http://127.0.0.1:8000/api/v1/auth/token/',
-                'from@yamdb.com',
+                EMAIL_FROM,
                 [f'{user.email}'],
                 fail_silently=False,
             )
